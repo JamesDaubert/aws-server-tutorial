@@ -129,6 +129,7 @@ Before we update the rest of index.html file, let's go to S3 in our console and 
 * This allows for EMR calls made by you to have read/write permissions for the S3 bucket. This step will be reproduced for a few buckets. * In index.html, on line 70, update `OUTPUT=s3://PATH/output'` with the proper values. The path value is just the name of the bucket. It should look like: `'OUTPUT=s3://output-for-my-program/output'`
 * Next, create a new bucket to house the node-install.sh script. Follow the same directions as above, creating a new bucket with a unique name like 'node-install-script-bucket', then click **Upload** and upload nodeinstall.sh to the bucket. Update the **Permissions** of the bucket as you did above, plugging in the proper `ARN` 
 * Copy the path of the script (by clicking on the script while inside the bucket, and selecting **Copy path**, and replace on line 78 `Path: 's3://path/nodeinstall.sh'`in `BootstrapActions`section with the proper path.Just highlight the entire default s3 value, and paste in the proper new path you just copied from the console. 
+* Once index.html is complete, compress html and Dockerfile into a .zip file, and re-upload the source to Elastic Beanstalk, and deploy. 
 ### Looking at EMR.runJobFlow()
 Peruse the `params` object in index.html, and see what exactly is being passed to the EMR instance you are initializing. You should recognize some of the values from when you started up an EMR cluster from the console. You are calling a fleet of three servers, 1 master node, and 2 core nodes. The `Steps` portion is where jobs are submitted to the cluster. The `Jar` value is `command-runner.jar`, which is a simple file AWS provides that allows us to run some command-line scripts. In `Args` we have `'hive-script'`passed first, which tells the command-runner that the next arguments will be for a hive script. The first s3 file is the Hive script alluded to at the start of the EMR section. The `INPUT`object is where the data is coming from that the Hive script is mapping and reducing. 
 #
@@ -139,7 +140,9 @@ Peruse the `params` object in index.html, and see what exactly is being passed t
 #
 #
 ### Click Run numbers
-This will run a step, and after it is done, check your S3 output bucket for the results! 
+* After clicking, pull up your EMR console, a new job should be **Starting**. If you do not see one, ensure your region is set to **N. Virginia**, oftentimes the default region is **Ohio**, but the `runJobFlow()` call has N Virginia as its region. 
+* If you don't see any job, go back to the EB webpage, right click, and select **Inspect Element**, look at Network & Console, and see if there are any errorrs on the runJobFlow() call. If there is, fix it, and re-deploy your code to the EB console, and click Run numbers again. 
+* Output will be located in output/os_request/000000_0, click on the 000000_0 file, and **Open** it. 
 #### Sources
 Hive tutorial & code: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-gs.html
 AWS Explanations: https://www.expeditedssl.com/aws-in-plain-english 
